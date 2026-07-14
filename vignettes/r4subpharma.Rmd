@@ -1,0 +1,116 @@
+---
+title: "Scoring submission readiness from a pharmaverse pipeline"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Scoring submission readiness from a pharmaverse pipeline}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+has_score <- requireNamespace("r4subscore", quietly = TRUE)
+```
+
+`r4subpharma` bridges a [pharmaverse](https://pharmaverse.org) pipeline and the
+R4SUB ecosystem. It reads the metadata and datasets you already build and emits
+standardized evidence that [r4subscore](https://github.com/R4SUB/r4subscore) can
+turn into a Submission Confidence Index (SCI). Nothing about your pipeline has to
+change: you add one block at the end.
+
+```{r setup}
+library(r4subpharma)
+```
+
+## The metadata contract
+
+Both adapters operate on one small table with a row per dataset variable. You
+can hand it a `data.frame` directly, or a `metacore` object, which
+`as_variable_metadata()` unpacks for you.
+
+```{r meta}
+meta <- data.frame(
+  dataset  = "ADSL",
+  variable = c("USUBJID", "AGE", "SEX", "TRTSDT"),
+  label    = c("Unique Subject Identifier", "Age", "Sex", "Date of First Exposure"),
+  type     = c("text", "integer", "text", "integer"),
+  origin   = c("Predecessor", "Derived", "Predecessor", "Derived"),
+  derivation = c(NA, "Age at informed consent", NA, "First dosing date from EX"),
+  stringsAsFactors = FALSE
+)
+
+as_variable_metadata(meta)
+```
+
+With a real `metacore` object the call is identical — this is how you would wire
+it into an existing spec:
+
+```{r metacore, eval = FALSE}
+mc <- metacore::spec_to_metacore("adam_spec.xlsx")
+meta <- as_variable_metadata(metacore::select_dataset(mc, "ADSL"))
+```
+
+## Evidence from metadata
+
+`metacore_to_evidence()` scores how completely each variable is documented,
+reusing the `Q-DEFINE-002` (documented) and `Q-DEFINE-003` (derivation present)
+indicators so this evidence lines up with anything parsed straight from
+Define-XML.
+
+```{r meta-evidence}
+ctx <- r4subcore::r4sub_run_context("STUDY01", "PROD")
+ev_meta <- metacore_to_evidence(meta, ctx)
+
+ev_meta[, c("indicator_id", "location", "result", "severity")]
+```
+
+## Evidence from an ADaM dataset
+
+`adam_to_evidence()` compares a built dataset against the same metadata. Here
+`SEX` is missing, `STUDYID` is undescribed, and no labels have been applied yet —
+each becomes an evidence row across the trace, quality, and usability pillars.
+
+```{r adam-evidence}
+adsl <- data.frame(
+  USUBJID = c("01-001", "01-002"),
+  AGE     = c(54, 61),
+  TRTSDT  = c(19100, 19112),
+  STUDYID = c("STUDY01", "STUDY01"),
+  stringsAsFactors = FALSE
+)
+
+ev_adam <- adam_to_evidence(adsl, meta, ctx, dataset_name = "ADSL")
+
+ev_adam[, c("indicator_id", "indicator_domain", "location", "result")]
+```
+
+## One call to a score
+
+`submission_readiness()` runs both adapters over a set of datasets and, when
+`r4subscore` is installed, computes the SCI.
+
+```{r readiness, eval = has_score}
+res <- submission_readiness(list(ADSL = adsl), meta, ctx)
+res
+```
+
+```{r sci, eval = has_score}
+res$sci$SCI
+res$sci$band
+```
+
+## How the pieces map to the SCI
+
+| Source | Indicators | Pillar |
+|---|---|---|
+| `metacore_to_evidence()` | `Q-DEFINE-002`, `Q-DEFINE-003` | quality |
+| `adam_to_evidence()` | `T-ADAM-001`, `T-ADAM-002` | trace |
+| `adam_to_evidence()` | `Q-ADAM-001` | quality |
+| `adam_to_evidence()` | `Q-ADAM-002` | usability |
+
+Because the adapters emit the standard R4SUB evidence schema, the resulting table
+also flows into `r4subrisk` for risk quantification and `r4subprofile` for
+authority-specific weighting, exactly like evidence from any other source.
