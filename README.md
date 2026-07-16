@@ -10,7 +10,7 @@
 reporting stack to the **R4SUB** (*Ready for Submission*) ecosystem. It turns the
 metadata and datasets a pharmaverse pipeline already produces into standardized
 R4SUB evidence, so submission readiness can be scored with
-[r4subscore](https://github.com/R4SUB/r4subscore) — **without changing your
+[r4subscore](https://github.com/R4SUB/r4subscore), **without changing your
 pipeline**.
 
 ## Why
@@ -30,7 +30,7 @@ pak::pak("R4SUB/r4subpharma")
 
 ## The metadata contract
 
-Both adapters work from one small table — one row per dataset variable — that
+Both adapters work from one small table, one row per dataset variable, that
 [`as_variable_metadata()`] builds from either a
 [`metacore`](https://github.com/pharmaverse/metacore) object or a plain
 data.frame:
@@ -81,9 +81,9 @@ See `vignette("r4subpharma")` for the full walkthrough.
 
 ## Part of the R4SUB ecosystem
 
-- [r4subcore](https://github.com/R4SUB/r4subcore) — evidence schema and parsers
-- [r4subscore](https://github.com/R4SUB/r4subscore) — Submission Confidence Index
-- [r4sub](https://github.com/R4SUB/r4sub) — meta-package for the ecosystem
+- [r4subcore](https://github.com/R4SUB/r4subcore): evidence schema and parsers
+- [r4subscore](https://github.com/R4SUB/r4subscore): Submission Confidence Index
+- [r4sub](https://github.com/R4SUB/r4sub): meta-package for the ecosystem
 
 ## License
 
