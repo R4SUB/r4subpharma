@@ -1,0 +1,130 @@
+---
+title: "Case study: scoring the CDISC pilot ADaM package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Case study: scoring the CDISC pilot ADaM package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+has_pkgs <- all(vapply(
+  c("metacore", "pharmaverseadam", "r4subscore"),
+  requireNamespace, logical(1), quietly = TRUE
+))
+knitr::opts_chunk$set(eval = has_pkgs)
+```
+
+This case study scores a real, public ADaM package end to end. Nothing is
+hand-tuned: we take two artifacts that were produced **independently** and ask
+how ready the result is for submission.
+
+- The **specification** comes from
+  [metacore](https://github.com/pharmaverse/metacore): the CDISC pilot ADaM
+  metadata, describing what each dataset and variable should be.
+- The **datasets** come from
+  [pharmaverseadam](https://github.com/pharmaverse/pharmaverseadam): ADaM data
+  built with [admiral](https://github.com/pharmaverse/admiral).
+
+Because the spec and the data were not made to match each other, the score is
+not a formality. It tells us where the package stands.
+
+```{r, eval = TRUE, echo = FALSE, results = "asis"}
+if (!has_pkgs) {
+  cat("> The packages needed to run this case study (metacore,",
+      "pharmaverseadam, r4subscore) are not installed, so the code below is",
+      "shown but not evaluated.\n")
+}
+```
+
+## The inputs
+
+```{r setup}
+library(r4subpharma)
+
+# The CDISC pilot ADaM specification (covers ADSL, ADAE, ADLBC, ADADAS, ADTTE)
+e <- new.env()
+load(metacore::metacore_example("pilot_ADaM.rda"), envir = e)
+spec <- e$metacore
+
+# One of the admiral-built datasets
+adsl <- pharmaverseadam::adsl
+dim(adsl)
+```
+
+## One call to a score
+
+`submission_readiness()` harvests documentation evidence from the spec and
+conformance evidence from the dataset, then computes the Submission Confidence
+Index.
+
+```{r score-adsl}
+ctx <- r4subcore::r4sub_run_context("CDISCPILOT01", "PROD")
+spec_adsl <- metacore::select_dataset(spec, "ADSL", verbose = "silent")
+
+res <- submission_readiness(list(ADSL = adsl), spec_adsl, ctx)
+res
+```
+
+## Reading the score
+
+The pillar breakdown shows where the number comes from.
+
+```{r pillars}
+as.data.frame(res$sci$pillar_scores)
+```
+
+Quality (documentation and types) and usability (labels) are strong. The weak
+pillar is **traceability**: the specification lists variables that the built
+dataset does not yet contain. That single gap is what holds the score back.
+
+## The gap, made actionable
+
+The value of a score is the fix list behind it. The failing traceability checks
+name exactly which specified variables are missing from the data.
+
+```{r gaps}
+ev <- res$evidence
+missing <- ev[ev$indicator_id == "T-ADAM-001" & ev$result == "fail", ]
+nrow(missing)
+sub(".*: ", "", missing$message)
+```
+
+These are the CDISC pilot analysis variables: treatment-coded flags, age and
+site groupings, and completion flags. An analysis-ready ADSL is expected to
+carry them, so their absence is a real readiness finding, not a formatting nit.
+
+We can also see the smaller quality signals: any variable whose type does not
+match the specification.
+
+```{r types}
+ev[ev$indicator_id == "Q-ADAM-001" & ev$result == "warn",
+   c("location", "message")]
+```
+
+## Scoring more of the package
+
+The same call scales to several datasets at once; the score then reflects the
+whole set of evidence.
+
+```{r package}
+res_pkg <- submission_readiness(
+  list(ADSL = pharmaverseadam::adsl, ADAE = pharmaverseadam::adae),
+  spec,
+  ctx
+)
+res_pkg$sci$SCI
+as.data.frame(res_pkg$sci$pillar_scores)
+```
+
+## Takeaways
+
+- The score is honest. On genuinely independent inputs it lands in the
+  "minor gaps" band, driven down by a specific, explainable traceability gap.
+- The evidence is actionable: the failing checks are a prioritized list of
+  variables to add, not an opaque number.
+- It is reproducible on public data, and the evidence table flows into the rest
+  of the R4SUB ecosystem. Use `r4subprofile` for authority-specific weighting and
+  `r4subrisk` for risk quantification, with no extra work.
+```

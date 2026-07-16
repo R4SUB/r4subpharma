@@ -10,3 +10,5 @@
   `T-ADAM-002`, `Q-ADAM-001`, `Q-ADAM-002`).
 - `submission_readiness()`: harvest evidence from metadata and one or more ADaM
   datasets and compute the Submission Confidence Index in a single call.
+- Added the `cdisc-pilot` vignette, a worked case study that scores the CDISC
+  pilot ADaM package using public `metacore` and `pharmaverseadam` data.
