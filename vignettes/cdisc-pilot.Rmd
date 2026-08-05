@@ -21,7 +21,7 @@ hand-tuned: we take two artifacts that were produced **independently** and ask
 how ready the result is for submission.
 
 - The **specification** comes from
-  [metacore](https://github.com/pharmaverse/metacore): the CDISC pilot ADaM
+  [metacore](https://github.com/atorus-research/metacore): the CDISC pilot ADaM
   metadata, describing what each dataset and variable should be.
 - The **datasets** come from
   [pharmaverseadam](https://github.com/pharmaverse/pharmaverseadam): ADaM data

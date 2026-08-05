@@ -1,6 +1,6 @@
-# r4subpharma 0.0.0.9000
+# r4subpharma 0.1.0
 
-- Initial development version.
+- Initial release.
 - `as_variable_metadata()`: normalize a `metacore` object or a data.frame into
   the shared variable-metadata contract used by the adapters.
 - `metacore_to_evidence()`: convert metadata into R4SUB documentation evidence,

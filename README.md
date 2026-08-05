@@ -32,7 +32,7 @@ pak::pak("R4SUB/r4subpharma")
 
 Both adapters work from one small table, one row per dataset variable, that
 [`as_variable_metadata()`] builds from either a
-[`metacore`](https://github.com/pharmaverse/metacore) object or a plain
+[`metacore`](https://github.com/atorus-research/metacore) object or a plain
 data.frame:
 
 | Column | Meaning |
