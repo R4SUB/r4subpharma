@@ -27,15 +27,10 @@ metadata_columns <- function() {
 #' @return A [tibble][tibble::tibble] with columns `dataset`, `variable`,
 #'   `label`, `type`, `origin`, `derivation`, and `is_derived`.
 #'
-#' @examples
-#' meta <- data.frame(
-#'   dataset  = "ADSL",
-#'   variable = c("USUBJID", "AGE"),
-#'   label    = c("Unique Subject Identifier", "Age"),
-#'   type     = c("text", "integer"),
-#'   stringsAsFactors = FALSE
-#' )
-#' as_variable_metadata(meta)
+#' @examplesIf requireNamespace("r4subdata", quietly = TRUE)
+#' # The example ADaM metadata shipped in r4subdata.
+#' meta <- as_variable_metadata(r4subdata::adam_metadata)
+#' head(meta)
 #'
 #' @importFrom cli cli_abort
 #' @export
@@ -93,8 +88,13 @@ derived_flag <- function(origin, derivation) {
 
 # Unpack a 'metacore' object into the variable-metadata contract. Reached only
 # when a Metacore object is supplied, so 'metacore' is necessarily attached.
+#
+# metacore spec tables commonly key a variable as "DATASET.VARIABLE" (e.g.
+# "ADSL.AGE") while ds_vars uses the plain name. We match on the qualified key
+# first and fall back to the plain variable name, so both conventions resolve.
 metacore_variable_metadata <- function(mc) {
   pick <- function(df, name) if (name %in% names(df)) df[[name]] else NA
+  strip_ds <- function(x) sub("^[^.]+\\.", "", as.character(x))
 
   ds_vars  <- as.data.frame(mc$ds_vars)
   var_spec <- as.data.frame(mc$var_spec)
@@ -104,14 +104,24 @@ metacore_variable_metadata <- function(mc) {
   dataset  <- as.character(pick(ds_vars, "dataset"))
   variable <- as.character(pick(ds_vars, "variable"))
 
-  # Variable-level attributes (label, type) live in var_spec, keyed by variable.
-  vs_var <- as.character(pick(var_spec, "variable"))
-  label  <- blank_to_na(pick(var_spec, "label")[match(variable, vs_var)])
-  type   <- blank_to_na(pick(var_spec, "type")[match(variable, vs_var)])
+  # Variable-level attributes (label, type) live in var_spec.
+  vs_var_raw   <- as.character(pick(var_spec, "variable"))
+  vs_var_plain <- strip_ds(vs_var_raw)
+  vs_idx <- match(paste0(dataset, ".", variable), vs_var_raw)
+  vs_miss <- is.na(vs_idx)
+  vs_idx[vs_miss] <- match(variable[vs_miss], vs_var_plain)
+  label  <- blank_to_na(pick(var_spec, "label")[vs_idx])
+  type   <- blank_to_na(pick(var_spec, "type")[vs_idx])
 
   # Origin and derivation live in value_spec, keyed by dataset + variable. Where
   # a variable has several value-level rows we take the first.
-  vsp_key <- paste(pick(val_spec, "dataset"), pick(val_spec, "variable"))
+  vsp_var_plain <- strip_ds(pick(val_spec, "variable"))
+  vsp_ds <- as.character(pick(val_spec, "dataset"))
+  if (all(is.na(vsp_ds))) {
+    # No dataset column: recover it from the qualified "DATASET.VARIABLE" key.
+    vsp_ds <- sub("\\..*$", "", as.character(pick(val_spec, "variable")))
+  }
+  vsp_key <- paste(vsp_ds, vsp_var_plain)
   idx     <- match(paste(dataset, variable), vsp_key)
   origin  <- blank_to_na(pick(val_spec, "origin")[idx])
   der_id  <- pick(val_spec, "derivation_id")[idx]

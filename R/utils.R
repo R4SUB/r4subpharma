@@ -3,6 +3,18 @@
 # Null-coalescing helper.
 `%||%` <- function(x, y) if (is.null(x)) y else x
 
+# Abort unless `x` is a single non-NA string (NULL allowed when allow_null).
+assert_scalar_string <- function(x, arg, allow_null = FALSE) {
+  if (is.null(x)) {
+    if (allow_null) return(invisible(NULL))
+    cli::cli_abort("{.arg {arg}} must be a single string, not NULL.")
+  }
+  if (!is.character(x) || length(x) != 1L || is.na(x)) {
+    cli::cli_abort("{.arg {arg}} must be a single string.")
+  }
+  invisible(NULL)
+}
+
 # TRUE for scalar character values that carry actual content.
 has_text <- function(x) {
   !is.null(x) && length(x) == 1L && !is.na(x) && nzchar(trimws(x))

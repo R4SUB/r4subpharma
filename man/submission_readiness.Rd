@@ -33,18 +33,16 @@ Confidence Index (SCI) in one call. It is the fastest way to go from a
 'pharmaverse' pipeline to a readiness score.
 }
 \examples{
-meta <- data.frame(
-  dataset  = "ADSL",
-  variable = c("USUBJID", "AGE"),
-  label    = c("Unique Subject Identifier", "Age"),
-  type     = c("text", "integer"),
-  stringsAsFactors = FALSE
-)
-adsl <- data.frame(USUBJID = "01-001", AGE = 54, stringsAsFactors = FALSE)
-ctx <- suppressMessages(r4subcore::r4sub_run_context("STUDY01", "DEV"))
-res <- suppressMessages(submission_readiness(list(ADSL = adsl), meta, ctx))
+\dontshow{if (requireNamespace("r4subdata", quietly = TRUE) && requireNamespace("pharmaverseadam", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# Score the CDISC pilot ADSL against the ADaM metadata in r4subdata.
+ctx <- suppressMessages(r4subcore::r4sub_run_context("CDISCPILOT01", "DEV"))
+res <- suppressMessages(submission_readiness(
+  list(ADSL = pharmaverseadam::adsl),
+  r4subdata::adam_metadata,
+  ctx
+))
 nrow(res$evidence)
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=metacore_to_evidence]{metacore_to_evidence()}}, \code{\link[=adam_to_evidence]{adam_to_evidence()}}

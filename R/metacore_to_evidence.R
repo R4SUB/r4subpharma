@@ -27,21 +27,13 @@
 #'
 #' @seealso [adam_to_evidence()], [submission_readiness()]
 #'
-#' @examples
-#' meta <- data.frame(
-#'   dataset  = "ADSL",
-#'   variable = c("USUBJID", "TRTSDT"),
-#'   label    = c("Unique Subject Identifier", "Date of First Exposure"),
-#'   type     = c("text", "integer"),
-#'   origin   = c("Predecessor", "Derived"),
-#'   derivation = c(NA, "First dosing date from EX"),
-#'   stringsAsFactors = FALSE
-#' )
+#' @examplesIf requireNamespace("r4subdata", quietly = TRUE)
+#' # The example ADaM metadata shipped in r4subdata.
 #' ctx <- suppressMessages(r4subcore::r4sub_run_context("STUDY01", "DEV"))
-#' ev <- suppressMessages(metacore_to_evidence(meta, ctx))
-#' nrow(ev)
+#' ev  <- suppressMessages(metacore_to_evidence(r4subdata::adam_metadata, ctx))
+#' table(ev$indicator_id, ev$result)
 #'
-#' @importFrom cli cli_alert_info
+#' @importFrom cli cli_alert_info cli_abort
 #' @export
 metacore_to_evidence <- function(metadata,
                                  ctx,
@@ -50,6 +42,8 @@ metacore_to_evidence <- function(metadata,
   if (!inherits(ctx, "r4sub_run_context")) {
     cli::cli_abort("{.arg ctx} must be an {.cls r4sub_run_context}.")
   }
+  assert_scalar_string(source_name, "source_name")
+  assert_scalar_string(source_version, "source_version", allow_null = TRUE)
   meta <- as_variable_metadata(metadata)
   if (nrow(meta) == 0L) {
     cli::cli_abort("{.arg metadata} describes no variables.")

@@ -55,22 +55,18 @@ specifies (quality).}
 }
 }
 \examples{
-meta <- data.frame(
-  dataset  = "ADSL",
-  variable = c("USUBJID", "AGE", "SEX"),
-  label    = c("Unique Subject Identifier", "Age", "Sex"),
-  type     = c("text", "integer", "text"),
-  stringsAsFactors = FALSE
-)
-adsl <- data.frame(
-  USUBJID = c("01-001", "01-002"),
-  AGE     = c(54, 61),
-  stringsAsFactors = FALSE
-)
-ctx <- suppressMessages(r4subcore::r4sub_run_context("STUDY01", "DEV"))
-ev <- suppressMessages(adam_to_evidence(adsl, meta, ctx, dataset_name = "ADSL"))
-nrow(ev)
-
+\dontshow{if (requireNamespace("r4subdata", quietly = TRUE) && requireNamespace("pharmaverseadam", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# Check the CDISC pilot ADSL from pharmaverseadam against the ADaM metadata
+# shipped in r4subdata.
+ctx <- suppressMessages(r4subcore::r4sub_run_context("CDISCPILOT01", "DEV"))
+ev  <- suppressMessages(adam_to_evidence(
+  pharmaverseadam::adsl,
+  r4subdata::adam_metadata,
+  ctx,
+  dataset_name = "ADSL"
+))
+table(ev$indicator_id, ev$result)
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=metacore_to_evidence]{metacore_to_evidence()}}, \code{\link[=submission_readiness]{submission_readiness()}}

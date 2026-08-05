@@ -23,13 +23,9 @@ for the required \code{dataset} and \code{variable} columns and completed with a
 missing optional columns.
 }
 \examples{
-meta <- data.frame(
-  dataset  = "ADSL",
-  variable = c("USUBJID", "AGE"),
-  label    = c("Unique Subject Identifier", "Age"),
-  type     = c("text", "integer"),
-  stringsAsFactors = FALSE
-)
-as_variable_metadata(meta)
-
+\dontshow{if (requireNamespace("r4subdata", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# The example ADaM metadata shipped in r4subdata.
+meta <- as_variable_metadata(r4subdata::adam_metadata)
+head(meta)
+\dontshow{\}) # examplesIf}
 }

@@ -44,19 +44,12 @@ evidence group together in scoring and explainability:
 }
 }
 \examples{
-meta <- data.frame(
-  dataset  = "ADSL",
-  variable = c("USUBJID", "TRTSDT"),
-  label    = c("Unique Subject Identifier", "Date of First Exposure"),
-  type     = c("text", "integer"),
-  origin   = c("Predecessor", "Derived"),
-  derivation = c(NA, "First dosing date from EX"),
-  stringsAsFactors = FALSE
-)
+\dontshow{if (requireNamespace("r4subdata", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# The example ADaM metadata shipped in r4subdata.
 ctx <- suppressMessages(r4subcore::r4sub_run_context("STUDY01", "DEV"))
-ev <- suppressMessages(metacore_to_evidence(meta, ctx))
-nrow(ev)
-
+ev  <- suppressMessages(metacore_to_evidence(r4subdata::adam_metadata, ctx))
+table(ev$indicator_id, ev$result)
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=adam_to_evidence]{adam_to_evidence()}}, \code{\link[=submission_readiness]{submission_readiness()}}

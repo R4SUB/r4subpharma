@@ -21,16 +21,14 @@ Imports:
     r4subcore,
     tibble
 Suggests:
-    admiral,
     knitr,
     metacore,
-    metatools,
     pharmaverseadam,
+    r4subdata,
     r4subprofile,
     r4subscore,
     rmarkdown,
-    testthat (>= 3.0.0),
-    xportr
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Encoding: UTF-8

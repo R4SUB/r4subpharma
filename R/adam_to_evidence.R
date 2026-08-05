@@ -32,22 +32,17 @@
 #'
 #' @seealso [metacore_to_evidence()], [submission_readiness()]
 #'
-#' @examples
-#' meta <- data.frame(
-#'   dataset  = "ADSL",
-#'   variable = c("USUBJID", "AGE", "SEX"),
-#'   label    = c("Unique Subject Identifier", "Age", "Sex"),
-#'   type     = c("text", "integer", "text"),
-#'   stringsAsFactors = FALSE
-#' )
-#' adsl <- data.frame(
-#'   USUBJID = c("01-001", "01-002"),
-#'   AGE     = c(54, 61),
-#'   stringsAsFactors = FALSE
-#' )
-#' ctx <- suppressMessages(r4subcore::r4sub_run_context("STUDY01", "DEV"))
-#' ev <- suppressMessages(adam_to_evidence(adsl, meta, ctx, dataset_name = "ADSL"))
-#' nrow(ev)
+#' @examplesIf requireNamespace("r4subdata", quietly = TRUE) && requireNamespace("pharmaverseadam", quietly = TRUE)
+#' # Check the CDISC pilot ADSL from pharmaverseadam against the ADaM metadata
+#' # shipped in r4subdata.
+#' ctx <- suppressMessages(r4subcore::r4sub_run_context("CDISCPILOT01", "DEV"))
+#' ev  <- suppressMessages(adam_to_evidence(
+#'   pharmaverseadam::adsl,
+#'   r4subdata::adam_metadata,
+#'   ctx,
+#'   dataset_name = "ADSL"
+#' ))
+#' table(ev$indicator_id, ev$result)
 #'
 #' @importFrom cli cli_abort cli_alert_info
 #' @export
@@ -63,6 +58,9 @@ adam_to_evidence <- function(data,
   if (!inherits(ctx, "r4sub_run_context")) {
     cli::cli_abort("{.arg ctx} must be an {.cls r4sub_run_context}.")
   }
+  assert_scalar_string(dataset_name, "dataset_name", allow_null = TRUE)
+  assert_scalar_string(source_name, "source_name")
+  assert_scalar_string(source_version, "source_version", allow_null = TRUE)
 
   meta <- as_variable_metadata(metadata)
   dataset_name <- resolve_dataset_name(meta, dataset_name)
@@ -173,7 +171,18 @@ type_rows <- function(data, meta, dataset_name, source_name, source_version) {
 
   expected <- normalize_type(meta$type)
   actual   <- vapply(meta$variable, function(v) observed_type(data[[v]]), character(1))
-  match_ok <- !is.na(actual) & actual == expected
+
+  # Only compare where the observed type is determinable. Dates, times, and
+  # logicals map to NA and are skipped rather than reported as a spurious
+  # "type is NA" mismatch.
+  determinable <- !is.na(actual)
+  meta     <- meta[determinable, , drop = FALSE]
+  expected <- expected[determinable]
+  actual   <- actual[determinable]
+  if (nrow(meta) == 0L) {
+    return(pre_evidence_template())
+  }
+  match_ok <- actual == expected
 
   data.frame(
     asset_type       = "dataset",

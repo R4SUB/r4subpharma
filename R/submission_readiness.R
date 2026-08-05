@@ -22,17 +22,14 @@
 #'
 #' @seealso [metacore_to_evidence()], [adam_to_evidence()]
 #'
-#' @examples
-#' meta <- data.frame(
-#'   dataset  = "ADSL",
-#'   variable = c("USUBJID", "AGE"),
-#'   label    = c("Unique Subject Identifier", "Age"),
-#'   type     = c("text", "integer"),
-#'   stringsAsFactors = FALSE
-#' )
-#' adsl <- data.frame(USUBJID = "01-001", AGE = 54, stringsAsFactors = FALSE)
-#' ctx <- suppressMessages(r4subcore::r4sub_run_context("STUDY01", "DEV"))
-#' res <- suppressMessages(submission_readiness(list(ADSL = adsl), meta, ctx))
+#' @examplesIf requireNamespace("r4subdata", quietly = TRUE) && requireNamespace("pharmaverseadam", quietly = TRUE)
+#' # Score the CDISC pilot ADSL against the ADaM metadata in r4subdata.
+#' ctx <- suppressMessages(r4subcore::r4sub_run_context("CDISCPILOT01", "DEV"))
+#' res <- suppressMessages(submission_readiness(
+#'   list(ADSL = pharmaverseadam::adsl),
+#'   r4subdata::adam_metadata,
+#'   ctx
+#' ))
 #' nrow(res$evidence)
 #'
 #' @importFrom cli cli_abort cli_alert_info cli_alert_warning
