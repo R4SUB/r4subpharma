@@ -85,6 +85,10 @@ See `vignette("r4subpharma")` for the full walkthrough.
 - [r4subscore](https://github.com/R4SUB/r4subscore): Submission Confidence Index
 - [r4sub](https://github.com/R4SUB/r4sub): meta-package for the ecosystem
 
+## Maintained by
+
+R4SUB is part of the open-source work of [TechWorksLab](https://techworkslab.com) - clinical programming and regulatory submissions. Maintainer: Pawan Rama Mali.
+
 ## License
 
 MIT © Pawan Rama Mali
