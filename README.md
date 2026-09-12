@@ -2,8 +2,8 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/R4SUB/r4subpharma/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/R4SUB/r4subpharma/actions/workflows/R-CMD-check.yaml)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![CRAN status](https://www.r-pkg.org/badges/version/r4subpharma)](https://CRAN.R-project.org/package=r4subpharma)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/r4subpharma)](https://CRAN.R-project.org/package=r4subpharma)
 <!-- badges: end -->
 
 **r4subpharma** connects the [pharmaverse](https://pharmaverse.org) clinical
@@ -24,7 +24,12 @@ feeds them to a single, defensible **Submission Confidence Index (SCI)**.
 ## Installation
 
 ```r
-# install.packages("pak")
+install.packages("r4subpharma")
+```
+
+Development version:
+
+```r
 pak::pak("R4SUB/r4subpharma")
 ```
 
@@ -92,3 +97,7 @@ R4SUB is part of the open-source work of [TechWorksLab](https://techworkslab.com
 ## License
 
 MIT © Pawan Rama Mali
+
+## Further reading
+
+- [Building ADaM datasets with the admiral package](https://techworkslab.com/insights-adam-admiral), part of the pharmaverse stack this package adapts, from TECHWORKSLAB.
