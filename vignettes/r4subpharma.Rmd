@@ -45,7 +45,7 @@ meta <- data.frame(
 as_variable_metadata(meta)
 ```
 
-With a real `metacore` object the call is identical — this is how you would wire
+With a real `metacore` object the call is identical - this is how you would wire
 it into an existing spec:
 
 ```{r metacore, eval = FALSE}
@@ -70,7 +70,7 @@ ev_meta[, c("indicator_id", "location", "result", "severity")]
 ## Evidence from an ADaM dataset
 
 `adam_to_evidence()` compares a built dataset against the same metadata. Here
-`SEX` is missing, `STUDYID` is undescribed, and no labels have been applied yet —
+`SEX` is missing, `STUDYID` is undescribed, and no labels have been applied yet - 
 each becomes an evidence row across the trace, quality, and usability pillars.
 
 ```{r adam-evidence}
