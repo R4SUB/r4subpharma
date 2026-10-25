@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">r4subpharma</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -118,7 +118,7 @@ score is not a formality. It tells us where the package stands.</p>
 <span><span class="co"># One of the admiral-built datasets</span></span>
 <span><span class="va">adsl</span> <span class="op">&lt;-</span> <span class="fu">pharmaverseadam</span><span class="fu">::</span><span class="va"><a href="https://pharmaverse.github.io/pharmaverseadam/reference/adsl.html" class="external-link">adsl</a></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">adsl</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 306  55</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 306  57</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="one-call-to-a-score">One call to a score<a class="anchor" aria-label="anchor" href="#one-call-to-a-score"></a>
@@ -128,19 +128,19 @@ from the spec and conformance evidence from the dataset, then computes
 the Submission Confidence Index.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctx</span> <span class="op">&lt;-</span> <span class="fu">r4subcore</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/r4subcore/man/r4sub_run_context.html" class="external-link">r4sub_run_context</a></span><span class="op">(</span><span class="st">"CDISCPILOT01"</span>, <span class="st">"PROD"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Run context created: <span style="color: #0000BB;">"R4S-20260912002231-wl4dieex"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Run context created: <span style="color: #0000BB;">"R4S-20261025204459-wl4dieex"</span></span></span>
 <span><span class="va">spec_adsl</span> <span class="op">&lt;-</span> <span class="fu">metacore</span><span class="fu">::</span><span class="fu"><a href="https://atorus-research.github.io/metacore/reference/select_dataset.html" class="external-link">select_dataset</a></span><span class="op">(</span><span class="va">spec</span>, <span class="st">"ADSL"</span>, verbose <span class="op">=</span> <span class="st">"silent"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/submission_readiness.html">submission_readiness</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ADSL <span class="op">=</span> <span class="va">adsl</span><span class="op">)</span>, <span class="va">spec_adsl</span>, <span class="va">ctx</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> metacore_to_evidence: 102 rows from 51 variables</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 102 rows</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> adam_to_evidence: 125 rows for dataset <span style="color: #0000BB;">"ADSL"</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 125 rows</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Bound 2 evidence tables: 227 total rows</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> adam_to_evidence: 127 rows for dataset <span style="color: #0000BB;">"ADSL"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 127 rows</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Bound 2 evidence tables: 229 total rows</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Submission Confidence Index: <span style="color: #0000BB;">79.5</span> (minor_gaps)</span></span>
 <span><span class="va">res</span></span>
 <span><span class="co">#&gt; &lt;submission_readiness&gt;</span></span>
-<span><span class="co">#&gt;   evidence rows: 227 </span></span>
+<span><span class="co">#&gt;   evidence rows: 229 </span></span>
 <span><span class="co">#&gt;   SCI:           79.5 </span></span>
 <span><span class="co">#&gt;   band:          minor_gaps</span></span></code></pre></div>
 </div>
@@ -227,11 +227,11 @@ reflects the whole set of evidence.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> metacore_to_evidence: 436 rows from 218 variables</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 436 rows</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> adam_to_evidence: 125 rows for dataset <span style="color: #0000BB;">"ADSL"</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 125 rows</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> adam_to_evidence: 127 rows for dataset <span style="color: #0000BB;">"ADSL"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 127 rows</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> adam_to_evidence: 201 rows for dataset <span style="color: #0000BB;">"ADAE"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 201 rows</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Bound 3 evidence tables: 762 total rows</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Bound 3 evidence tables: 764 total rows</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Submission Confidence Index: <span style="color: #0000BB;">82.8</span> (minor_gaps)</span></span>
 <span><span class="va">res_pkg</span><span class="op">$</span><span class="va">sci</span><span class="op">$</span><span class="va">SCI</span></span>
 <span><span class="co">#&gt; [1] 82.8</span></span>

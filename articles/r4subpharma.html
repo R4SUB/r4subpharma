@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">r4subpharma</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -124,7 +124,7 @@ unpacks for you.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ADSL    AGE      Age                       integ… Deriv… Age at in… TRUE      </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ADSL    SEX      Sex                       text   Prede… <span style="color: #BB0000;">NA</span>         FALSE     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ADSL    TRTSDT   Date of First Exposure    integ… Deriv… First dos… TRUE</span></span></code></pre></div>
-<p>With a real <code>metacore</code> object the call is identical — this
+<p>With a real <code>metacore</code> object the call is identical - this
 is how you would wire it into an existing spec:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mc</span> <span class="op">&lt;-</span> <span class="fu">metacore</span><span class="fu">::</span><span class="fu"><a href="https://atorus-research.github.io/metacore/reference/spec_to_metacore.html" class="external-link">spec_to_metacore</a></span><span class="op">(</span><span class="st">"adam_spec.xlsx"</span><span class="op">)</span></span>
@@ -140,7 +140,7 @@ indicators so this evidence lines up with anything parsed straight from
 Define-XML.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctx</span> <span class="op">&lt;-</span> <span class="fu">r4subcore</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/r4subcore/man/r4sub_run_context.html" class="external-link">r4sub_run_context</a></span><span class="op">(</span><span class="st">"STUDY01"</span>, <span class="st">"PROD"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Run context created: <span style="color: #0000BB;">"R4S-20260912002233-wl4dieex"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Run context created: <span style="color: #0000BB;">"R4S-20261025204502-wl4dieex"</span></span></span>
 <span><span class="va">ev_meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metacore_to_evidence.html">metacore_to_evidence</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">ctx</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> metacore_to_evidence: 6 rows from 4 variables</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 6 rows</span></span>
@@ -159,7 +159,7 @@ Define-XML.</p>
 </h2>
 <p><code><a href="../reference/adam_to_evidence.html">adam_to_evidence()</a></code> compares a built dataset against the
 same metadata. Here <code>SEX</code> is missing, <code>STUDYID</code> is
-undescribed, and no labels have been applied yet — each becomes an
+undescribed, and no labels have been applied yet - each becomes an
 evidence row across the trace, quality, and usability pillars.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adsl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
