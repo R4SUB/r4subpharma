@@ -1,10 +1,11 @@
 ## Submission notes
 
-This is the first submission of r4subpharma. It bridges the 'pharmaverse'
-clinical reporting stack and the R4SUB (Ready for Submission) ecosystem,
-converting 'metacore' metadata and ADaM datasets into standardized R4SUB
-evidence via 'r4subcore' so that submission readiness can be scored without
-changing an existing pharmaverse pipeline.
+This is an update of r4subpharma from 0.1.0 (on CRAN) to 0.2.0. It bridges the
+'pharmaverse' clinical reporting stack and the R4SUB (Ready for Submission)
+ecosystem, converting 'metacore' metadata and ADaM datasets into standardized
+R4SUB evidence via 'r4subcore' so that submission readiness can be scored
+without changing an existing pharmaverse pipeline. See NEWS.md for the changes
+since the last CRAN release.
 
 The imported package 'r4subcore' is available on CRAN. All suggested packages
 ('metacore', 'pharmaverseadam', 'r4subdata', 'r4subprofile', 'r4subscore',
@@ -18,9 +19,7 @@ suggested packages are guarded with requireNamespace().
 
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
-
-The note is the standard "New submission" note.
+0 errors | 0 warnings | 0 notes
 
 ## Downstream dependencies
 

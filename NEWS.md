@@ -1,3 +1,7 @@
+# r4subpharma 0.2.0
+
+- Prepared for CRAN submission; metadata and documentation polish.
+
 # r4subpharma 0.1.0
 
 - Initial release.
