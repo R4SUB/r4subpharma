@@ -1,6 +1,10 @@
 # r4subpharma 0.2.0
 
 - Prepared for CRAN submission; metadata and documentation polish.
+- Expanded test coverage: the `metacore` path where `value_spec` omits a
+  `dataset` column (recovered from the qualified `DATASET.VARIABLE` key), and
+  `submission_readiness()` forwarding an explicit `sci_config`. No change to
+  adapter behaviour.
 
 # r4subpharma 0.1.0
 

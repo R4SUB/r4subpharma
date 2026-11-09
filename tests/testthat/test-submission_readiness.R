@@ -50,3 +50,19 @@ test_that("submission_readiness computes an SCI when r4subscore is available", {
   expect_lte(res$sci$SCI, 100)
   expect_output(print(res), "submission_readiness")
 })
+
+test_that("submission_readiness forwards an explicit sci_config", {
+  skip_if_not_installed("r4subscore")
+
+  adsl <- data.frame(USUBJID = "01-001", AGE = 54, SEX = "M",
+                     stringsAsFactors = FALSE)
+  config <- r4subscore::sci_config_default()
+  res <- suppressMessages(
+    submission_readiness(list(ADSL = adsl), demo_meta(), make_ctx(),
+                         config = config)
+  )
+
+  expect_s3_class(res, "submission_readiness")
+  expect_false(is.null(res$sci))
+  expect_true(is.numeric(res$sci$SCI))
+})

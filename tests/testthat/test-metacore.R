@@ -49,3 +49,38 @@ test_that("plain variable keys resolve too", {
   expect_equal(age$type, "integer")
   expect_equal(age$derivation, "Age from BRTHDTC")
 })
+
+test_that("value_spec without a dataset column recovers it from the qualified key", {
+  # Some metacore builds omit a dataset column in value_spec and only carry the
+  # qualified "DATASET.VARIABLE" key; as_variable_metadata should recover the
+  # dataset from that key rather than losing origin/derivation.
+  mc <- structure(
+    list(
+      ds_vars = data.frame(
+        dataset = c("ADSL", "ADSL"), variable = c("AGE", "SEX"),
+        stringsAsFactors = FALSE
+      ),
+      var_spec = data.frame(
+        variable = c("ADSL.AGE", "ADSL.SEX"), label = c("Age", "Sex"),
+        type = c("integer", "text"), stringsAsFactors = FALSE
+      ),
+      value_spec = data.frame(
+        variable = c("ADSL.AGE", "ADSL.SEX"),
+        origin = c("Derived", "CRF"),
+        derivation_id = c("MD1", NA), stringsAsFactors = FALSE
+      ),
+      derivations = data.frame(
+        derivation_id = "MD1", derivation = "Age from BRTHDTC",
+        stringsAsFactors = FALSE
+      )
+    ),
+    class = "Metacore"
+  )
+
+  meta <- as_variable_metadata(mc)
+  age <- meta[meta$variable == "AGE", ]
+  expect_equal(age$origin, "Derived")
+  expect_equal(age$derivation, "Age from BRTHDTC")
+  expect_true(age$is_derived)
+  expect_equal(meta$origin[meta$variable == "SEX"], "CRF")
+})
