@@ -2,7 +2,7 @@ make_ctx <- function() {
   suppressMessages(r4subcore::r4sub_run_context("STUDY01", "DEV"))
 }
 
-test_that("dataset_metadata_to_evidence emits one Q-DEFINE-001 row per dataset", {
+test_that("dataset_metadata_to_evidence emits one Q-DEFINE-004 row per dataset", {
   meta <- data.frame(
     dataset   = c("ADSL", "ADAE"),
     label     = c("Subject-Level Analysis Dataset", "Adverse Events Analysis"),
@@ -13,7 +13,7 @@ test_that("dataset_metadata_to_evidence emits one Q-DEFINE-001 row per dataset",
 
   ev <- suppressMessages(dataset_metadata_to_evidence(meta, make_ctx()))
 
-  expect_true(all(ev$indicator_id == "Q-DEFINE-001"))
+  expect_true(all(ev$indicator_id == "Q-DEFINE-004"))
   expect_equal(nrow(ev), 2L)
   expect_true(all(ev$indicator_domain == "quality"))
   expect_true(all(ev$asset_type == "define"))
@@ -102,7 +102,7 @@ test_that("dataset_metadata_to_evidence runs on a real metacore object", {
   load(metacore::metacore_example("pilot_ADaM.rda"))
   ev <- suppressMessages(dataset_metadata_to_evidence(metacore, make_ctx()))
 
-  expect_true(all(ev$indicator_id == "Q-DEFINE-001"))
+  expect_true(all(ev$indicator_id == "Q-DEFINE-004"))
   expect_equal(nrow(ev), nrow(as.data.frame(metacore$ds_spec)))
   expect_true(all(ev$result %in% c("pass", "warn", "fail")))
 })
