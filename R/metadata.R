@@ -139,3 +139,109 @@ metacore_variable_metadata <- function(mc) {
     is_derived = derived_flag(origin, derivation)
   )
 }
+
+# Dataset-metadata seam --------------------------------------------------------
+#
+# `dataset_metadata_to_evidence()` works at the dataset level rather than the
+# variable level, so it needs its own small contract: a "dataset metadata" table
+# with one row per dataset and the columns
+#   dataset, label, structure, n_keys
+# `as_dataset_metadata()` turns a 'metacore' object (its `ds_spec` plus the key
+# variables recorded in `ds_vars`) or a plain data.frame into that contract.
+# Keeping this seam explicit means the dataset-level evidence logic can be
+# exercised with an ordinary data.frame and does not depend on 'metacore'.
+
+dataset_metadata_columns <- function() {
+  c("dataset", "label", "structure", "n_keys")
+}
+
+#' Coerce Metadata to the Dataset-Metadata Contract
+#'
+#' Normalizes the accepted metadata inputs into a tidy table with one row per
+#' dataset, describing how completely each dataset itself is documented. A
+#' `metacore` object contributes its `ds_spec` (dataset label and structure)
+#' and the count of key variables recorded in `ds_vars` (those with a
+#' `key_seq`); a data.frame is checked for the required `dataset` column and
+#' completed with any missing optional columns.
+#'
+#' @param metadata Either a `Metacore` object or a data.frame with at least the
+#'   column `dataset`. Optional columns `label`, `structure`, and `n_keys` are
+#'   used when present. A logical `has_keys` column is accepted in place of
+#'   `n_keys`.
+#'
+#' @return A [tibble][tibble::tibble] with columns `dataset`, `label`,
+#'   `structure`, and `n_keys`.
+#'
+#' @seealso [dataset_metadata_to_evidence()], [as_variable_metadata()]
+#'
+#' @examplesIf requireNamespace("metacore", quietly = TRUE)
+#' # The CDISC pilot ADaM metacore specification shipped with metacore.
+#' load(metacore::metacore_example("pilot_ADaM.rda"))
+#' head(as_dataset_metadata(metacore))
+#'
+#' @importFrom cli cli_abort
+#' @export
+as_dataset_metadata <- function(metadata) {
+  if (inherits(metadata, "Metacore")) {
+    return(metacore_dataset_metadata(metadata))
+  }
+  if (is.data.frame(metadata)) {
+    return(coerce_dataset_metadata_df(metadata))
+  }
+  cli::cli_abort(c(
+    "{.arg metadata} must be a {.cls Metacore} object or a data.frame.",
+    "x" = "Got {.cls {class(metadata)[1]}}."
+  ))
+}
+
+# Complete a user-supplied dataset-metadata data.frame.
+coerce_dataset_metadata_df <- function(x) {
+  if (!"dataset" %in% names(x)) {
+    cli::cli_abort(
+      "Dataset-metadata data.frame is missing required column: {.field dataset}"
+    )
+  }
+
+  get_col <- function(name) {
+    if (name %in% names(x)) blank_to_na(x[[name]]) else NA_character_
+  }
+
+  dataset   <- as.character(x$dataset)
+  label     <- get_col("label")
+  structure <- get_col("structure")
+
+  if ("n_keys" %in% names(x)) {
+    n_keys <- as.integer(x$n_keys)
+    n_keys[is.na(n_keys)] <- 0L
+  } else if ("has_keys" %in% names(x)) {
+    n_keys <- as.integer(as.logical(x$has_keys))
+    n_keys[is.na(n_keys)] <- 0L
+  } else {
+    n_keys <- rep(0L, length(dataset))
+  }
+
+  tibble::tibble(dataset, label, structure, n_keys)
+}
+
+# Unpack a 'metacore' object's dataset-level metadata. Reached only when a
+# Metacore object is supplied, so 'metacore' is necessarily attached. Key
+# variables are those carrying a key_seq in ds_vars.
+metacore_dataset_metadata <- function(mc) {
+  pick <- function(df, name) if (name %in% names(df)) df[[name]] else NA
+
+  ds_spec <- as.data.frame(mc$ds_spec)
+  ds_vars <- as.data.frame(mc$ds_vars)
+
+  dataset   <- as.character(pick(ds_spec, "dataset"))
+  label     <- blank_to_na(pick(ds_spec, "label"))
+  structure <- blank_to_na(pick(ds_spec, "structure"))
+
+  dv_dataset <- as.character(pick(ds_vars, "dataset"))
+  dv_key     <- pick(ds_vars, "key_seq")
+  is_key     <- !is.na(dv_key)
+  key_counts <- tapply(is_key, dv_dataset, sum)
+  n_keys     <- as.integer(key_counts[dataset])
+  n_keys[is.na(n_keys)] <- 0L
+
+  tibble::tibble(dataset, label, structure, n_keys)
+}

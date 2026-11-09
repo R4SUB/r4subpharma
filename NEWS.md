@@ -1,3 +1,12 @@
+# r4subpharma (development version)
+
+- `dataset_metadata_to_evidence()`: emit dataset-level documentation-presence
+  evidence from a `metacore` object's `ds_spec` and `ds_vars` - whether each
+  dataset documents a label, a structure, and at least one key variable -
+  reusing the `Q-DEFINE-001` indicator. Added `as_dataset_metadata()` to
+  normalize a `metacore` object or data.frame into the dataset-metadata
+  contract. Existing adapters are unchanged.
+
 # r4subpharma 0.2.0
 
 - Prepared for CRAN submission; metadata and documentation polish.
