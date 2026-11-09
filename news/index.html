@@ -61,6 +61,13 @@
     </div>
 
     <div class="section level2">
+<h2 class="page-header" data-toc-text="development version" id="r4subpharma-development-version">r4subpharma (development version)<a class="anchor" aria-label="anchor" href="#r4subpharma-development-version"></a></h2>
+<ul><li>
+<code><a href="../reference/pharma_evidence.html">pharma_evidence()</a></code>: a convenience wrapper that composes the existing adapters into one combined evidence table in a single call. It runs <code><a href="../reference/metacore_to_evidence.html">metacore_to_evidence()</a></code> and <code><a href="../reference/dataset_metadata_to_evidence.html">dataset_metadata_to_evidence()</a></code> and, when an ADaM data.frame is supplied, <code><a href="../reference/adam_to_evidence.html">adam_to_evidence()</a></code>, then row-binds the results. Pure composition - no new indicators or semantics; the output equals binding the individual adapters’ outputs. Existing adapters are unchanged.</li>
+<li>
+<code><a href="../reference/dataset_metadata_to_evidence.html">dataset_metadata_to_evidence()</a></code>: emit dataset-level documentation-presence evidence from a <code>metacore</code> object’s <code>ds_spec</code> and <code>ds_vars</code> - whether each dataset documents a label, a structure, and at least one key variable - under the dedicated <code>Q-DEFINE-004</code> indicator (distinct from the label-only <code>Q-DEFINE-001</code>). Added <code><a href="../reference/as_dataset_metadata.html">as_dataset_metadata()</a></code> to normalize a <code>metacore</code> object or data.frame into the dataset-metadata contract. Existing adapters are unchanged.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="page-header" data-toc-text="0.2.0" id="r4subpharma-020">r4subpharma 0.2.0<a class="anchor" aria-label="anchor" href="#r4subpharma-020"></a></h2>
 <ul><li>Prepared for CRAN submission; metadata and documentation polish.</li>
 <li>Expanded test coverage: the <code>metacore</code> path where <code>value_spec</code> omits a <code>dataset</code> column (recovered from the qualified <code>DATASET.VARIABLE</code> key), and <code><a href="../reference/submission_readiness.html">submission_readiness()</a></code> forwarding an explicit <code>sci_config</code>. No change to adapter behaviour.</li>

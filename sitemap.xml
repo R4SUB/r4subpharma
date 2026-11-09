@@ -9,9 +9,12 @@
 <url><loc>/index.html</loc></url>
 <url><loc>/news/index.html</loc></url>
 <url><loc>/reference/adam_to_evidence.html</loc></url>
+<url><loc>/reference/as_dataset_metadata.html</loc></url>
 <url><loc>/reference/as_variable_metadata.html</loc></url>
+<url><loc>/reference/dataset_metadata_to_evidence.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/metacore_to_evidence.html</loc></url>
+<url><loc>/reference/pharma_evidence.html</loc></url>
 <url><loc>/reference/r4subpharma-package.html</loc></url>
 <url><loc>/reference/submission_readiness.html</loc></url>
 </urlset>
