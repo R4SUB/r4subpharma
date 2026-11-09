@@ -1,5 +1,12 @@
 # r4subpharma (development version)
 
+- `pharma_evidence()`: a convenience wrapper that composes the existing
+  adapters into one combined evidence table in a single call. It runs
+  `metacore_to_evidence()` and `dataset_metadata_to_evidence()` and, when an
+  ADaM data.frame is supplied, `adam_to_evidence()`, then row-binds the
+  results. Pure composition - no new indicators or semantics; the output
+  equals binding the individual adapters' outputs. Existing adapters are
+  unchanged.
 - `dataset_metadata_to_evidence()`: emit dataset-level documentation-presence
   evidence from a `metacore` object's `ds_spec` and `ds_vars` - whether each
   dataset documents a label, a structure, and at least one key variable -
