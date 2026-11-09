@@ -7,11 +7,13 @@
 #' adapter reports the dataset-level counterpart drawn from a `metacore`
 #' object's `ds_spec` and `ds_vars`.
 #'
-#' One indicator is evaluated per dataset, reusing the dataset-level identifier
-#' emitted by `r4subcore::define_xml_to_evidence()` so that metadata- and
-#' Define-XML-sourced evidence group together in scoring and explainability:
+#' One indicator is evaluated per dataset, under the dataset-documentation
+#' identifier `Q-DEFINE-004`. This is distinct from `Q-DEFINE-001` (dataset
+#' present with a non-empty label), which `r4subcore::define_xml_to_evidence()`
+#' emits, so the two dataset-level checks stay separately identifiable in
+#' scoring and explainability:
 #' \describe{
-#'   \item{Q-DEFINE-001}{Dataset is documented: it carries a label, a structure
+#'   \item{Q-DEFINE-004}{Dataset is documented: it carries a label, a structure
 #'     description, and at least one key variable.}
 #' }
 #'
@@ -65,7 +67,7 @@ dataset_metadata_to_evidence <- function(metadata,
   r4subcore::as_evidence(rows, ctx = ctx)
 }
 
-# Q-DEFINE-001: dataset documented (label + structure + key variables present).
+# Q-DEFINE-004: dataset documented (label + structure + key variables present).
 dataset_documentation_rows <- function(meta, source_name, source_version) {
   has_label     <- !is.na(meta$label)
   has_structure <- !is.na(meta$structure)
@@ -88,7 +90,7 @@ dataset_documentation_rows <- function(meta, source_name, source_version) {
     asset_id         = meta$dataset,
     source_name      = source_name,
     source_version   = source_version %||% NA_character_,
-    indicator_id     = "Q-DEFINE-001",
+    indicator_id     = "Q-DEFINE-004",
     indicator_name   = "Dataset Documented in Metadata",
     indicator_domain = "quality",
     severity         = severity,

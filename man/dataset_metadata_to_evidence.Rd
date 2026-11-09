@@ -37,11 +37,13 @@ adapter reports the dataset-level counterpart drawn from a \code{metacore}
 object's \code{ds_spec} and \code{ds_vars}.
 }
 \details{
-One indicator is evaluated per dataset, reusing the dataset-level identifier
-emitted by \code{r4subcore::define_xml_to_evidence()} so that metadata- and
-Define-XML-sourced evidence group together in scoring and explainability:
+One indicator is evaluated per dataset, under the dataset-documentation
+identifier \code{Q-DEFINE-004}. This is distinct from \code{Q-DEFINE-001}
+(dataset present with a non-empty label), which
+\code{r4subcore::define_xml_to_evidence()} emits, so the two dataset-level
+checks stay separately identifiable in scoring and explainability:
 \describe{
-\item{Q-DEFINE-001}{Dataset is documented: it carries a label, a structure
+\item{Q-DEFINE-004}{Dataset is documented: it carries a label, a structure
 description, and at least one key variable.}
 }
 
