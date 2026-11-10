@@ -129,6 +129,33 @@
 </tr>
 </tbody>
 </table>
+<div class="section level3">
+<h3 id="dataset-level-metadata">Dataset-level metadata<a class="anchor" aria-label="anchor" href="#dataset-level-metadata"></a>
+</h3>
+<p><code><a href="reference/dataset_metadata_to_evidence.html">dataset_metadata_to_evidence()</a></code> works one level up, from a table with one row per <em>dataset</em> that [<code><a href="reference/as_dataset_metadata.html">as_dataset_metadata()</a></code>] builds from a <code>metacore</code> object’s <code>ds_spec</code> and <code>ds_vars</code> (or a plain data.frame):</p>
+<table class="table">
+<thead><tr>
+<th>Column</th>
+<th>Meaning</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>dataset</code></td>
+<td>Identify the dataset (required)</td>
+</tr>
+<tr>
+<td>
+<code>label</code>, <code>structure</code>
+</td>
+<td>Documentation attributes</td>
+</tr>
+<tr>
+<td><code>n_keys</code></td>
+<td>Number of key variables</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
@@ -156,6 +183,14 @@
 <p>In a real pipeline the metadata comes from <code>metacore</code> and the datasets from <code>admiral</code>; the call is otherwise identical.</p>
 </div>
 <div class="section level2">
+<h2 id="one-call-for-all-the-evidence">One call for all the evidence<a class="anchor" aria-label="anchor" href="#one-call-for-all-the-evidence"></a>
+</h2>
+<p><code><a href="reference/pharma_evidence.html">pharma_evidence()</a></code> composes the adapters into a single evidence table. It runs <code><a href="reference/metacore_to_evidence.html">metacore_to_evidence()</a></code> and <code><a href="reference/dataset_metadata_to_evidence.html">dataset_metadata_to_evidence()</a></code>, adds <code><a href="reference/adam_to_evidence.html">adam_to_evidence()</a></code> when an ADaM data.frame is supplied, and row-binds the results. It is pure composition - no new indicators or semantics - so the output equals binding the individual adapters’ outputs yourself:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ev</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pharma_evidence.html">pharma_evidence</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">ctx</span><span class="op">)</span>                               <span class="co"># metadata only</span></span>
+<span><span class="va">ev</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/pharma_evidence.html">pharma_evidence</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">ctx</span>, data <span class="op">=</span> <span class="va">adsl</span>, dataset_name <span class="op">=</span> <span class="st">"ADSL"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="how-evidence-maps-to-the-sci-pillars">How evidence maps to the SCI pillars<a class="anchor" aria-label="anchor" href="#how-evidence-maps-to-the-sci-pillars"></a>
 </h2>
 <table class="table">
@@ -170,6 +205,11 @@
 <td>
 <code>Q-DEFINE-002</code>, <code>Q-DEFINE-003</code>
 </td>
+<td>quality</td>
+</tr>
+<tr>
+<td><code><a href="reference/dataset_metadata_to_evidence.html">dataset_metadata_to_evidence()</a></code></td>
+<td><code>Q-DEFINE-004</code></td>
 <td>quality</td>
 </tr>
 <tr>
