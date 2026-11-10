@@ -46,6 +46,18 @@ data.frame:
 | `label`, `type` | Documentation attributes |
 | `origin`, `derivation`, `is_derived` | Provenance |
 
+### Dataset-level metadata
+
+`dataset_metadata_to_evidence()` works one level up, from a table with one row
+per *dataset* that [`as_dataset_metadata()`] builds from a `metacore` object's
+`ds_spec` and `ds_vars` (or a plain data.frame):
+
+| Column | Meaning |
+|---|---|
+| `dataset` | Identify the dataset (required) |
+| `label`, `structure` | Documentation attributes |
+| `n_keys` | Number of key variables |
+
 ## Quick start
 
 ```r
@@ -73,11 +85,25 @@ res$sci$band   # decision band
 In a real pipeline the metadata comes from `metacore` and the datasets from
 `admiral`; the call is otherwise identical.
 
+## One call for all the evidence
+
+`pharma_evidence()` composes the adapters into a single evidence table. It runs
+`metacore_to_evidence()` and `dataset_metadata_to_evidence()`, adds
+`adam_to_evidence()` when an ADaM data.frame is supplied, and row-binds the
+results. It is pure composition - no new indicators or semantics - so the output
+equals binding the individual adapters' outputs yourself:
+
+```r
+ev <- pharma_evidence(meta, ctx)                               # metadata only
+ev <- pharma_evidence(meta, ctx, data = adsl, dataset_name = "ADSL")
+```
+
 ## How evidence maps to the SCI pillars
 
 | Adapter | Indicators | SCI pillar |
 |---|---|---|
 | `metacore_to_evidence()` | `Q-DEFINE-002`, `Q-DEFINE-003` | quality |
+| `dataset_metadata_to_evidence()` | `Q-DEFINE-004` | quality |
 | `adam_to_evidence()` | `T-ADAM-001`, `T-ADAM-002` | trace |
 | `adam_to_evidence()` | `Q-ADAM-001` | quality |
 | `adam_to_evidence()` | `Q-ADAM-002` | usability |
