@@ -87,6 +87,33 @@ ev_adam <- adam_to_evidence(adsl, meta, ctx, dataset_name = "ADSL")
 ev_adam[, c("indicator_id", "indicator_domain", "location", "result")]
 ```
 
+## Evidence from controlled terminology
+
+`codelist_to_evidence()` looks at the controlled-terminology side of the
+metadata: for each variable that *references* a codelist, it checks whether that
+codelist is actually documented - either as an enumerated list with at least one
+term, or as a reference to an external dictionary such as MedDRA. It emits the
+new `Q-DEFINE-005` indicator. This is presence evidence only: it does not judge
+whether the terms are the correct CDISC Controlled Terminology values.
+
+```{r codelist-evidence}
+cl_meta <- data.frame(
+  dataset  = "ADSL",
+  variable = c("SEX", "RACE", "ETHNIC"),
+  code_id  = c("CL.SEX", "CL.RACE", "CL.ETHNIC"),
+  n_terms  = c(2, 6, 0),       # ETHNIC references a codelist that documents no terms
+  external = FALSE,
+  stringsAsFactors = FALSE
+)
+
+ev_cl <- codelist_to_evidence(cl_meta, ctx)
+ev_cl[, c("indicator_id", "location", "result", "severity")]
+```
+
+With a real `metacore` object the call is identical; `as_codelist_metadata()`
+joins `value_spec` (which variables reference which codelists) to `codelist`
+(how each codelist is defined) for you.
+
 ## One call to a score
 
 `submission_readiness()` runs both adapters over a set of datasets and, when
@@ -107,6 +134,7 @@ res$sci$band
 | Source | Indicators | Pillar |
 |---|---|---|
 | `metacore_to_evidence()` | `Q-DEFINE-002`, `Q-DEFINE-003` | quality |
+| `codelist_to_evidence()` | `Q-DEFINE-005` | quality |
 | `adam_to_evidence()` | `T-ADAM-001`, `T-ADAM-002` | trace |
 | `adam_to_evidence()` | `Q-ADAM-001` | quality |
 | `adam_to_evidence()` | `Q-ADAM-002` | usability |

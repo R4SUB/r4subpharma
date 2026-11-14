@@ -58,6 +58,19 @@ per *dataset* that [`as_dataset_metadata()`] builds from a `metacore` object's
 | `label`, `structure` | Documentation attributes |
 | `n_keys` | Number of key variables |
 
+### Codelist (controlled terminology) metadata
+
+`codelist_to_evidence()` works from the controlled-terminology side, from a
+table with one row per variable that *references* a codelist that
+[`as_codelist_metadata()`] builds from a `metacore` object's `value_spec` and
+`codelist` (or a plain data.frame):
+
+| Column | Meaning |
+|---|---|
+| `dataset`, `variable`, `code_id` | Identify the variable and the codelist it references (required) |
+| `n_terms` | Number of enumerated terms the codelist documents |
+| `external` | Whether the codelist is an external-dictionary reference (e.g. MedDRA) |
+
 ## Quick start
 
 ```r
@@ -104,6 +117,7 @@ ev <- pharma_evidence(meta, ctx, data = adsl, dataset_name = "ADSL")
 |---|---|---|
 | `metacore_to_evidence()` | `Q-DEFINE-002`, `Q-DEFINE-003` | quality |
 | `dataset_metadata_to_evidence()` | `Q-DEFINE-004` | quality |
+| `codelist_to_evidence()` | `Q-DEFINE-005` | quality |
 | `adam_to_evidence()` | `T-ADAM-001`, `T-ADAM-002` | trace |
 | `adam_to_evidence()` | `Q-ADAM-001` | quality |
 | `adam_to_evidence()` | `Q-ADAM-002` | usability |

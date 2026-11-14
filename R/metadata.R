@@ -245,3 +245,156 @@ metacore_dataset_metadata <- function(mc) {
 
   tibble::tibble(dataset, label, structure, n_keys)
 }
+
+# Codelist-metadata seam -------------------------------------------------------
+#
+# `codelist_to_evidence()` works at the controlled-terminology level: one row
+# per dataset variable that *references* a codelist, with the columns
+#   dataset, variable, code_id, n_terms, external
+# `as_codelist_metadata()` turns a 'metacore' object (its `value_spec`, which
+# links a variable to a codelist via `code_id`, joined to its `codelist` table)
+# or a plain data.frame into that contract. Keeping this seam explicit means the
+# codelist evidence logic can be exercised with an ordinary data.frame and does
+# not depend on 'metacore'.
+#
+#   n_terms  Integer count of enumerated terms the referenced codelist
+#            documents. NA when the reference is to an external dictionary
+#            (counted through `external`) or cannot be resolved to a codelist.
+#   external TRUE when the referenced codelist is an external-dictionary
+#            reference (e.g. MedDRA, WHODrug) rather than an enumerated list.
+
+codelist_metadata_columns <- function() {
+  c("dataset", "variable", "code_id", "n_terms", "external")
+}
+
+#' Coerce Metadata to the Codelist-Metadata Contract
+#'
+#' Normalizes the accepted metadata inputs into a tidy table with one row per
+#' dataset variable that references a codelist, describing whether that
+#' controlled terminology is documented. A `metacore` object contributes its
+#' `value_spec` (which variables reference which codelists, via `code_id`)
+#' joined to its `codelist` table (how each codelist is defined); a data.frame
+#' is checked for the required `dataset`, `variable`, and `code_id` columns and
+#' completed with any missing optional columns. Rows whose `code_id` is missing
+#' or blank - variables that reference no codelist - are dropped.
+#'
+#' @param metadata Either a `Metacore` object or a data.frame with at least the
+#'   columns `dataset`, `variable`, and `code_id`. Optional columns `n_terms`
+#'   (integer count of enumerated terms) and `external` (logical; `TRUE` for an
+#'   external-dictionary reference) are used when present. A logical `has_terms`
+#'   column is accepted in place of `n_terms`, and a `codelist_type` column
+#'   equal to `"external_library"` is accepted in place of `external`.
+#'
+#' @return A [tibble][tibble::tibble] with columns `dataset`, `variable`,
+#'   `code_id`, `n_terms`, and `external`.
+#'
+#' @seealso [codelist_to_evidence()], [as_variable_metadata()],
+#'   [as_dataset_metadata()]
+#'
+#' @examplesIf requireNamespace("metacore", quietly = TRUE)
+#' # The CDISC pilot ADaM metacore specification shipped with metacore.
+#' load(metacore::metacore_example("pilot_ADaM.rda"))
+#' head(as_codelist_metadata(metacore))
+#'
+#' @importFrom cli cli_abort
+#' @export
+as_codelist_metadata <- function(metadata) {
+  if (inherits(metadata, "Metacore")) {
+    return(metacore_codelist_metadata(metadata))
+  }
+  if (is.data.frame(metadata)) {
+    return(coerce_codelist_metadata_df(metadata))
+  }
+  cli::cli_abort(c(
+    "{.arg metadata} must be a {.cls Metacore} object or a data.frame.",
+    "x" = "Got {.cls {class(metadata)[1]}}."
+  ))
+}
+
+# Complete a user-supplied codelist-metadata data.frame.
+coerce_codelist_metadata_df <- function(x) {
+  missing_req <- setdiff(c("dataset", "variable", "code_id"), names(x))
+  if (length(missing_req) > 0L) {
+    cli::cli_abort(
+      "Codelist-metadata data.frame is missing required column{?s}: {.field {missing_req}}"
+    )
+  }
+
+  dataset  <- as.character(x$dataset)
+  variable <- as.character(x$variable)
+  code_id  <- blank_to_na(x$code_id)
+
+  if ("n_terms" %in% names(x)) {
+    n_terms <- as.integer(x$n_terms)
+  } else if ("has_terms" %in% names(x)) {
+    n_terms <- as.integer(as.logical(x$has_terms))
+  } else {
+    n_terms <- rep(NA_integer_, length(dataset))
+  }
+
+  if ("external" %in% names(x)) {
+    external <- as.logical(x$external)
+  } else if ("codelist_type" %in% names(x)) {
+    external <- tolower(as.character(x$codelist_type)) == "external_library"
+  } else {
+    external <- rep(FALSE, length(dataset))
+  }
+  external[is.na(external)] <- FALSE
+
+  out <- tibble::tibble(dataset, variable, code_id, n_terms, external)
+  out[!is.na(out$code_id), , drop = FALSE]
+}
+
+# Unpack a 'metacore' object's codelist references. Reached only when a Metacore
+# object is supplied, so 'metacore' is necessarily attached. Variables and their
+# codelist references live in value_spec; how each codelist is defined lives in
+# codelist. As in metacore_variable_metadata(), the value_spec dataset column may
+# be absent and is then recovered from the qualified "DATASET.VARIABLE" key.
+metacore_codelist_metadata <- function(mc) {
+  pick <- function(df, name) if (name %in% names(df)) df[[name]] else NA
+  strip_ds <- function(x) sub("^[^.]+\\.", "", as.character(x))
+
+  val_spec <- as.data.frame(mc$value_spec)
+  codelist <- as.data.frame(mc$codelist)
+
+  vs_var_raw <- as.character(pick(val_spec, "variable"))
+  variable   <- strip_ds(vs_var_raw)
+  dataset    <- as.character(pick(val_spec, "dataset"))
+  if (all(is.na(dataset))) {
+    dataset <- sub("\\..*$", "", vs_var_raw)
+  }
+  code_id <- blank_to_na(pick(val_spec, "code_id"))
+
+  # One row per variable that references a codelist.
+  keep <- !is.na(code_id)
+  dataset  <- dataset[keep]
+  variable <- variable[keep]
+  code_id  <- code_id[keep]
+  if (length(code_id) == 0L) {
+    return(tibble::tibble(
+      dataset = character(0), variable = character(0), code_id = character(0),
+      n_terms = integer(0), external = logical(0)
+    ))
+  }
+
+  # Resolve each referenced codelist: external-dictionary references carry no
+  # enumerated terms (n_terms = NA, external = TRUE); enumerated codelists carry
+  # a term count; an unresolved reference stays NA / FALSE (a documentation gap).
+  cl_id       <- as.character(pick(codelist, "code_id"))
+  cl_type     <- as.character(pick(codelist, "type"))
+  cl_codes    <- pick(codelist, "codes")
+  cl_external <- cl_type == "external_library"
+  cl_nterms   <- vapply(seq_along(cl_id), function(i) {
+    if (isTRUE(cl_external[i])) return(NA_integer_)
+    codes_i <- if (is.list(cl_codes)) cl_codes[[i]] else NA
+    if (is.data.frame(codes_i)) nrow(codes_i) else length(codes_i)
+  }, integer(1))
+
+  idx      <- match(code_id, cl_id)
+  external <- cl_external[idx]
+  external[is.na(external)] <- FALSE
+  n_terms  <- cl_nterms[idx]
+
+  out <- tibble::tibble(dataset, variable, code_id, n_terms, external)
+  unique(out)
+}

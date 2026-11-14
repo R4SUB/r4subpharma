@@ -1,5 +1,15 @@
 # r4subpharma (development version)
 
+- `codelist_to_evidence()`: emit controlled-terminology documentation-presence
+  evidence from a `metacore` object's `value_spec` and `codelist` - for each
+  variable that references a codelist, whether that codelist is documented
+  (resolves to an enumerated list with at least one term, or an
+  external-dictionary reference such as MedDRA/WHODrug) - under the new
+  `Q-DEFINE-005` indicator (distinct from the `Q-DEFINE-001` through
+  `Q-DEFINE-004` already in use). Added `as_codelist_metadata()` to normalize a
+  `metacore` object or data.frame into the codelist-metadata contract. This is
+  presence evidence only: it does not judge whether terms are the correct CDISC
+  Controlled Terminology values. Existing adapters are unchanged.
 - `pharma_evidence()`: a convenience wrapper that composes the existing
   adapters into one combined evidence table in a single call. It runs
   `metacore_to_evidence()` and `dataset_metadata_to_evidence()` and, when an
