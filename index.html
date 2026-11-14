@@ -156,6 +156,37 @@
 </tbody>
 </table>
 </div>
+<div class="section level3">
+<h3 id="codelist-controlled-terminology-metadata">Codelist (controlled terminology) metadata<a class="anchor" aria-label="anchor" href="#codelist-controlled-terminology-metadata"></a>
+</h3>
+<p><code><a href="reference/codelist_to_evidence.html">codelist_to_evidence()</a></code> works from the controlled-terminology side, from a table with one row per variable that <em>references</em> a codelist that [<code><a href="reference/as_codelist_metadata.html">as_codelist_metadata()</a></code>] builds from a <code>metacore</code> object’s <code>value_spec</code> and <code>codelist</code> (or a plain data.frame):</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Column</th>
+<th>Meaning</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>
+<code>dataset</code>, <code>variable</code>, <code>code_id</code>
+</td>
+<td>Identify the variable and the codelist it references (required)</td>
+</tr>
+<tr>
+<td><code>n_terms</code></td>
+<td>Number of enumerated terms the codelist documents</td>
+</tr>
+<tr>
+<td><code>external</code></td>
+<td>Whether the codelist is an external-dictionary reference (e.g. MedDRA)</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
@@ -210,6 +241,11 @@
 <tr>
 <td><code><a href="reference/dataset_metadata_to_evidence.html">dataset_metadata_to_evidence()</a></code></td>
 <td><code>Q-DEFINE-004</code></td>
+<td>quality</td>
+</tr>
+<tr>
+<td><code><a href="reference/codelist_to_evidence.html">codelist_to_evidence()</a></code></td>
+<td><code>Q-DEFINE-005</code></td>
 <td>quality</td>
 </tr>
 <tr>

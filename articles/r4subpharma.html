@@ -139,7 +139,7 @@ indicators so this evidence lines up with anything parsed straight from
 Define-XML.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ctx</span> <span class="op">&lt;-</span> <span class="fu">r4subcore</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/r4subcore/man/r4sub_run_context.html" class="external-link">r4sub_run_context</a></span><span class="op">(</span><span class="st">"STUDY01"</span>, <span class="st">"PROD"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Run context created: <span style="color: #0000BB;">"R4S-20261110000718-wl4dieex"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Run context created: <span style="color: #0000BB;">"R4S-20261114172352-wl4dieex"</span></span></span>
 <span><span class="va">ev_meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/metacore_to_evidence.html">metacore_to_evidence</a></span><span class="op">(</span><span class="va">meta</span>, <span class="va">ctx</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> metacore_to_evidence: 6 rows from 4 variables</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 6 rows</span></span>
@@ -188,12 +188,46 @@ evidence row across the trace, quality, and usability pillars.</p>
 <span><span class="co">#&gt; 11   Q-ADAM-002        usability  ADSL:TRTSDT   fail</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="evidence-from-controlled-terminology">Evidence from controlled terminology<a class="anchor" aria-label="anchor" href="#evidence-from-controlled-terminology"></a>
+</h2>
+<p><code><a href="../reference/codelist_to_evidence.html">codelist_to_evidence()</a></code> looks at the
+controlled-terminology side of the metadata: for each variable that
+<em>references</em> a codelist, it checks whether that codelist is
+actually documented - either as an enumerated list with at least one
+term, or as a reference to an external dictionary such as MedDRA. It
+emits the new <code>Q-DEFINE-005</code> indicator. This is presence
+evidence only: it does not judge whether the terms are the correct CDISC
+Controlled Terminology values.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cl_meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  dataset  <span class="op">=</span> <span class="st">"ADSL"</span>,</span>
+<span>  variable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SEX"</span>, <span class="st">"RACE"</span>, <span class="st">"ETHNIC"</span><span class="op">)</span>,</span>
+<span>  code_id  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CL.SEX"</span>, <span class="st">"CL.RACE"</span>, <span class="st">"CL.ETHNIC"</span><span class="op">)</span>,</span>
+<span>  n_terms  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">6</span>, <span class="fl">0</span><span class="op">)</span>,       <span class="co"># ETHNIC references a codelist that documents no terms</span></span>
+<span>  external <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  stringsAsFactors <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ev_cl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/codelist_to_evidence.html">codelist_to_evidence</a></span><span class="op">(</span><span class="va">cl_meta</span>, <span class="va">ctx</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> codelist_to_evidence: 3 rows from 3 codelist references</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 3 rows</span></span>
+<span><span class="va">ev_cl</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"indicator_id"</span>, <span class="st">"location"</span>, <span class="st">"result"</span>, <span class="st">"severity"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt;   indicator_id    location result severity</span></span>
+<span><span class="co">#&gt; 1 Q-DEFINE-005    ADSL:SEX   pass     info</span></span>
+<span><span class="co">#&gt; 2 Q-DEFINE-005   ADSL:RACE   pass     info</span></span>
+<span><span class="co">#&gt; 3 Q-DEFINE-005 ADSL:ETHNIC   warn   medium</span></span></code></pre></div>
+<p>With a real <code>metacore</code> object the call is identical;
+<code><a href="../reference/as_codelist_metadata.html">as_codelist_metadata()</a></code> joins <code>value_spec</code> (which
+variables reference which codelists) to <code>codelist</code> (how each
+codelist is defined) for you.</p>
+</div>
+<div class="section level2">
 <h2 id="one-call-to-a-score">One call to a score<a class="anchor" aria-label="anchor" href="#one-call-to-a-score"></a>
 </h2>
 <p><code><a href="../reference/submission_readiness.html">submission_readiness()</a></code> runs both adapters over a set of
 datasets and, when <code>r4subscore</code> is installed, computes the
 SCI.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/submission_readiness.html">submission_readiness</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ADSL <span class="op">=</span> <span class="va">adsl</span><span class="op">)</span>, <span class="va">meta</span>, <span class="va">ctx</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> metacore_to_evidence: 6 rows from 4 variables</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Evidence table created: 6 rows</span></span>
@@ -206,7 +240,7 @@ SCI.</p>
 <span><span class="co">#&gt;   evidence rows: 17 </span></span>
 <span><span class="co">#&gt;   SCI:           65.4 </span></span>
 <span><span class="co">#&gt;   band:          conditional</span></span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">sci</span><span class="op">$</span><span class="va">SCI</span></span>
 <span><span class="co">#&gt; [1] 65.4</span></span>
 <span><span class="va">res</span><span class="op">$</span><span class="va">sci</span><span class="op">$</span><span class="va">band</span></span>
@@ -230,18 +264,23 @@ SCI.</p>
 <td>quality</td>
 </tr>
 <tr class="even">
+<td><code><a href="../reference/codelist_to_evidence.html">codelist_to_evidence()</a></code></td>
+<td><code>Q-DEFINE-005</code></td>
+<td>quality</td>
+</tr>
+<tr class="odd">
 <td><code><a href="../reference/adam_to_evidence.html">adam_to_evidence()</a></code></td>
 <td>
 <code>T-ADAM-001</code>, <code>T-ADAM-002</code>
 </td>
 <td>trace</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code><a href="../reference/adam_to_evidence.html">adam_to_evidence()</a></code></td>
 <td><code>Q-ADAM-001</code></td>
 <td>quality</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code><a href="../reference/adam_to_evidence.html">adam_to_evidence()</a></code></td>
 <td><code>Q-ADAM-002</code></td>
 <td>usability</td>
