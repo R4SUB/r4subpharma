@@ -398,3 +398,126 @@ metacore_codelist_metadata <- function(mc) {
   out <- tibble::tibble(dataset, variable, code_id, n_terms, external)
   unique(out)
 }
+
+# Dataset-JSON metadata seam ---------------------------------------------------
+#
+# `datasetjson_to_evidence()` works at the level of a Dataset-JSON data-exchange
+# file: it records whether that file's metadata declares the structural keys the
+# CDISC Dataset-JSON standard defines. Its contract is a "dataset-json metadata"
+# table with one row per column and the columns
+#   dataset, dataset_label, records, name, label, data_type, length
+# where the dataset-level fields (dataset, dataset_label, records) are repeated
+# on each column row. `as_datasetjson_metadata()` turns a plain data.frame of
+# column metadata, or a parsed Dataset-JSON object (a list carrying a `columns`
+# element, as produced by `jsonlite::fromJSON()` or `datasetjson::read_dataset_json()`
+# on a Dataset-JSON v1.1 file), into that contract. Keeping this seam explicit
+# means the evidence logic can be exercised with an ordinary data.frame and does
+# not depend on the 'datasetjson' package being installed.
+
+datasetjson_metadata_columns <- function() {
+  c("dataset", "dataset_label", "records", "name", "label", "data_type", "length")
+}
+
+# Return column `x[[name]]` for the first of `candidates` present, or NULL.
+dj_col <- function(x, candidates) {
+  hit <- candidates[candidates %in% names(x)]
+  if (length(hit) == 0L) NULL else x[[hit[1]]]
+}
+
+#' Coerce Metadata to the Dataset-JSON Metadata Contract
+#'
+#' Normalizes the accepted inputs into a tidy table with one row per column of a
+#' Dataset-JSON data-exchange file, describing whether that file's metadata
+#' declares the structural keys the CDISC Dataset-JSON standard defines. A
+#' parsed Dataset-JSON object - a list with a `columns` element, such as
+#' `jsonlite::fromJSON()` or `datasetjson::read_dataset_json()` produce from a
+#' Dataset-JSON v1.1 file - contributes its column array (`name`, `label`,
+#' `dataType`, ...) together with the file's dataset-level `name`, `label`, and
+#' `records`; a data.frame is checked for the required `name` column and
+#' completed with any missing optional columns.
+#'
+#' @param metadata Either a data.frame of Dataset-JSON column metadata (one row
+#'   per column, with at least a `name` column; optional `label`, `data_type`
+#'   (alias `dataType`/`type`), and `length`, plus optional dataset-level
+#'   columns `dataset`, `dataset_label`, and `records`), or a parsed Dataset-JSON
+#'   object: a list with a `columns` element and optional top-level `name`,
+#'   `label`, and `records`.
+#'
+#' @return A [tibble][tibble::tibble] with columns `dataset`, `dataset_label`,
+#'   `records`, `name`, `label`, `data_type`, and `length`.
+#'
+#' @seealso [datasetjson_to_evidence()], [as_variable_metadata()]
+#'
+#' @examples
+#' cols <- data.frame(
+#'   name      = c("STUDYID", "USUBJID", "AGE"),
+#'   label     = c("Study Identifier", "Unique Subject Identifier", ""),
+#'   dataType  = c("string", "string", "integer"),
+#'   stringsAsFactors = FALSE
+#' )
+#' as_datasetjson_metadata(cols)
+#'
+#' @importFrom cli cli_abort
+#' @export
+as_datasetjson_metadata <- function(metadata) {
+  if (is.data.frame(metadata)) {
+    return(coerce_datasetjson_metadata_df(metadata))
+  }
+  if (is.list(metadata)) {
+    return(datasetjson_object_metadata(metadata))
+  }
+  cli::cli_abort(c(
+    "{.arg metadata} must be a data.frame of Dataset-JSON column metadata or a parsed Dataset-JSON object (a list with a {.field columns} element).",
+    "x" = "Got {.cls {class(metadata)[1]}}."
+  ))
+}
+
+# Complete a user-supplied Dataset-JSON column-metadata data.frame.
+coerce_datasetjson_metadata_df <- function(x) {
+  name <- dj_col(x, c("name", "variable"))
+  if (is.null(name)) {
+    cli::cli_abort(
+      "Dataset-JSON column-metadata data.frame is missing required column: {.field name}"
+    )
+  }
+  name <- blank_to_na(name)
+  n <- length(name)
+
+  opt_chr <- function(cands) {
+    v <- dj_col(x, cands)
+    if (is.null(v)) rep(NA_character_, n) else blank_to_na(v)
+  }
+  opt_int <- function(cands) {
+    v <- dj_col(x, cands)
+    if (is.null(v)) rep(NA_integer_, n) else suppressWarnings(as.integer(v))
+  }
+
+  tibble::tibble(
+    dataset       = opt_chr(c("dataset", "itemGroupName")),
+    dataset_label = opt_chr(c("dataset_label", "datasetLabel")),
+    records       = opt_int(c("records", "nrow")),
+    name          = name,
+    label         = opt_chr("label"),
+    data_type     = opt_chr(c("data_type", "dataType", "type")),
+    length        = opt_int(c("length", "len"))
+  )
+}
+
+# Unpack a parsed Dataset-JSON object (a list with a `columns` element, as
+# jsonlite::fromJSON() produces from a Dataset-JSON v1.1 file). Dataset-level
+# name/label/records live at the top level; column attributes live in `columns`.
+datasetjson_object_metadata <- function(obj) {
+  cols <- obj$columns
+  if (is.null(cols)) {
+    cli::cli_abort(c(
+      "{.arg metadata} looks like a parsed Dataset-JSON object but has no {.field columns} element.",
+      "i" = "Expected a Dataset-JSON v1.1 structure with a {.field columns} array."
+    ))
+  }
+  cols <- as.data.frame(cols, stringsAsFactors = FALSE)
+  scalar_or_na <- function(v) if (is.null(v) || length(v) == 0L) NA else v[[1]]
+  cols$dataset       <- scalar_or_na(obj$name)
+  cols$dataset_label <- scalar_or_na(obj$label)
+  cols$records       <- scalar_or_na(obj$records)
+  coerce_datasetjson_metadata_df(cols)
+}
