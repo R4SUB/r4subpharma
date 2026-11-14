@@ -1,5 +1,22 @@
 # r4subpharma (development version)
 
+- `datasetjson_to_evidence()`: emit structural-presence evidence from a CDISC
+  Dataset-JSON data-exchange file's metadata - either a parsed Dataset-JSON
+  object (a list with a `columns` element, as `jsonlite::fromJSON()` or
+  `datasetjson::read_dataset_json()` produce) or a plain data.frame of column
+  metadata. It records whether the file declares its dataset-level keys (name,
+  label, record count) under the new `Q-DJSON-001` indicator and whether each
+  column declares its required keys (name, label, data type) under the new
+  `Q-DJSON-002` indicator. Both identifiers are in a dedicated `Q-DJSON` family
+  that does not collide with the `Q-DEFINE-*`, `Q-ADAM-*`, or `T-ADAM-*`
+  indicators already in use. Added `as_datasetjson_metadata()` to normalize a
+  parsed Dataset-JSON object or data.frame into the Dataset-JSON metadata
+  contract. This is presence evidence only: it records whether each metadata
+  key is populated as the file reports it, and does not judge whether data
+  types are correct, whether the record count matches the rows, or whether
+  values conform to any controlled terminology. The core transform operates on
+  a plain data.frame, so it needs no external package installed. Existing
+  adapters are unchanged.
 - `codelist_to_evidence()`: emit controlled-terminology documentation-presence
   evidence from a `metacore` object's `value_spec` and `codelist` - for each
   variable that references a codelist, whether that codelist is documented
